@@ -8,8 +8,6 @@ from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions.path_join_substitution import PathJoinSubstitution
 from launch import LaunchDescription
-from webots_ros2_driver.webots_launcher import WebotsLauncher
-from webots_ros2_driver.utils import controller_url_prefix
 
 
 def str2bool(v):
@@ -17,19 +15,11 @@ def str2bool(v):
 
 
 def get_ros2_nodes(*args):
-    package_dir = get_package_share_directory("benchmark_webots")
-    robot_description = pathlib.Path(
-        os.path.join(package_dir, "resource", "robot.urdf")
-    ).read_text()
-    use_sim_time = LaunchConfiguration("use_sim_time", default=True)
-    show_gui = str2bool(os.getenv("BENCHMARK_GUI", "False"))
-
-    # Number of robots
-    num_robots = int(os.getenv("BENCHMARK_NUM_ROBOTS", 1))
+    package_dir = get_package_share_directory("measure_process_ros2_pkg")
 
     robot_node_list = []
 
-    process_name = "ros2_control_node, robot_state_publisher, move_group, spawner"
+    process_name = "ros2_control_node, robot_state_publisher, spawner, component_container, zenoh-bridge-ros2dds, containerd-shim, nice_robotics_gui"
     proc_list = process_name.split(", ")
 
     robot_node_list.append(
@@ -41,7 +31,7 @@ def get_ros2_nodes(*args):
             parameters=[
                 {
                     "process_name": process_name,
-                    "process_period": 1.0,
+                    "process_period": 0.1,
                 },
             ],
         )
@@ -59,7 +49,7 @@ def get_ros2_nodes(*args):
                     {
                         "output_file": f"/tmp/cpu_{proc_list[i]}.txt",
                         "initial_delay": 10,
-                        "number_samples": 60,
+                        "number_samples": 800,
                         "topic_array_index": i,  # Index within "process_name[]" of measure_process
                     },
                 ],
@@ -70,23 +60,6 @@ def get_ros2_nodes(*args):
 
 
 def generate_launch_description():
-    package_dir = get_package_share_directory("benchmark_webots")
-    world = LaunchConfiguration("world")
-    mode = LaunchConfiguration("mode")
-    # webots = WebotsLauncher(
-    #     world=PathJoinSubstitution([package_dir, "worlds", world]),
-    #     mode=mode,
-    #     ros2_supervisor=True,
-    # )
-
-    # reset_handler = launch.actions.RegisterEventHandler(
-    #     event_handler=launch.event_handlers.OnProcessExit(
-    #         target_action=webots._supervisor,
-    #         on_exit=get_ros2_nodes,
-    #     )
-    # )
-
-    num_robots = int(os.getenv("BENCHMARK_NUM_ROBOTS", 1))
 
     return LaunchDescription(
         [
