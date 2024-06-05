@@ -52,10 +52,10 @@ class RecordCpuUsage(Node):
             self.get_logger().info('ALL SAMPLES GRABBED. Shutting down')
             self.out_fil.close()
             time.sleep(1.0)
-            os.system('pkill -SIGINT ros2')
-            os.system('pkill -KILL gzclient')
-            os.system('pkill -KILL gzserver')
-            os.system('pkill -KILL webots-bin')
+            # os.system('pkill -SIGINT ros2')
+            # os.system('pkill -KILL gzclient')
+            # os.system('pkill -KILL gzserver')
+            # os.system('pkill -KILL webots-bin')
             #launch.actions.Shutdown()
 
     def iterate(self):
